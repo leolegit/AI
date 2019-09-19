@@ -72,6 +72,7 @@ class Robot:
         pass
     
     def getBearing(self, currentPosition, newPosition):
+        #Calculates the bearing angle between current position and the next position
         x1, y1 = currentPosition
         x2, y2 = newPosition
         bearingAngle = atan2(y2-y1, x2-x1)
@@ -79,22 +80,40 @@ class Robot:
 
     
     def turnAngle(self, bearing, heading):
+        #Calculate the difference between the bearing and heading angle
         tAngle = bearing - heading
-        return tAngle
+        
+        #Prevents the robot from turning in circles when angle is to big or small
+        if (tAngle < -pi):
+            tAngle = tAngle + 2*pi 
+            return(tAngle)
+        
+        elif (tAngle > pi):
+            tAngle = tAngle - 2*pi
+            return(tAngle)
+        
+        else:
+            return(tAngle)    
+        
     
     def getDistance(self, x, y):
+        #Calculates the distance between two positions
         return sqrt((x**2) + (y**2))
     
-    def carrotPoint(self, path, pose, lookAhead):
+    def carrotPoint(self, path, position, lookAhead):
+        #make a loop as long as the list of waypoints
         for i in range(len(path)):
+            #make the last waypoint in the list the latest waypoint, since path is reversed this is the closest waypoint
             newPosition = path[len(path)-1]
-            distanceX = newPosition['X'] - pose['X']
-            distanceY = newPosition['Y'] - pose['Y']
+            distanceX = newPosition['X'] - position['X']
+            distanceY = newPosition['Y'] - position['Y']
             
             distance = self.getDistance(distanceX, distanceY)
             
+            #if distance is smaller than the lookahead then remove it from the list
             if distance < lookAhead:
                 path.pop()
             else:
+                # if its greater than the lookahead make it the new waypoint
                 return newPosition
 
