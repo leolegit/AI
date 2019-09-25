@@ -9,6 +9,8 @@ Updated by Lennart Jern 2016-09-06 (converted to Python 3)
 Updated by Filip Allberg and Daniel Harr 2017-08-30 (actually converted to Python 3)
 Updated by Thomas Johansson 2019-08-22 from Lokarriaexample.py to a class implementation
 190904 thomasj fixed some errors in getHeading, getPosition. getHeading now returns and angle.
+
+Modified by Oscar Norrman & Alicia Strommer 2019-09-24.
 """
 
 import http.client, json, time
@@ -117,3 +119,26 @@ class Robot:
                 # if its greater than the lookahead make it the new waypoint
                 return newPosition
 
+    def getPath(self,file_name):
+        with open(file_name) as path_file:
+            data = json.load(path_file)
+        path = data        
+        vecArray = [{'X': p['Pose']['Position']['X'], \
+                     'Y': p['Pose']['Position']['Y']}\
+                     for p in path]
+        vecArray.reverse()
+        return vecArray
+    
+        
+    def postSpeed(self,angularSpeed,linearSpeed):
+        """Sends a speed command to the MRDS server"""
+        mrds = http.client.HTTPConnection(MRDS_URL)
+        params = json.dumps({'TargetAngularSpeed':angularSpeed,'TargetLinearSpeed':linearSpeed})
+        mrds.request('POST','/lokarria/differentialdrive',params,HEADERS)
+        response = mrds.getresponse()
+        status = response.status
+        #response.close()
+        if status == 204:
+            return response
+        else:
+            raise UnexpectedResponse(response)
